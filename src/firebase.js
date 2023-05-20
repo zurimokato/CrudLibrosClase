@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { privateKey } from "./private";
 
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -7,7 +8,7 @@ import { getFirestore } from "firebase/firestore";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAjJB0q8vwH1NyuqpLhZeoKJ5qYguVi9DU",
+  apiKey: privateKey,
   authDomain: "crudlibros-c76f2.firebaseapp.com",
   projectId: "crudlibros-c76f2",
   storageBucket: "crudlibros-c76f2.appspot.com",
