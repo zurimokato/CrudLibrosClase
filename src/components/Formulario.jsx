@@ -2,12 +2,51 @@
 
 import React,{useState,useEffect} from 'react'
 import { db } from '../firebase'
-import { collection,doc,addDoc,onSnapshot,deleteDoc,updateDoc } from 'firebase/firestore'
+import { collection,doc,addDoc,onSnapshot,deleteDoc,updateDoc, query } from 'firebase/firestore'
 
 
 function Formulario() {
-    const [nombreLibre, setNombreLibro]=useState('');
+    const [nombreLibro, setNombreLibro]=useState('');
     const [nombreAutor,setNombreAutor]=useState('');
+    const [listaLibros,setListaLibros]=useState([])
+
+    useEffect(()=>{
+        const obtenerDatos=async()=>{
+            try {
+                await onSnapshot(collection(db,'libros',(query)=>{
+                    setListaLibros(query.docs.map(doc=>({...doc.data(),id:doc.id}))
+                }))
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    });
+
+    const guardarLibros=async(e)=>{
+        e.preventDefault();
+        try{
+
+            const data=await addDoc(collection(db,'libros'),{
+                nombreLibro:nombreLibro,
+                nombreAutor:nombreAutor
+            })
+
+          
+            setListaLibros([...listaLibros,{
+                nombreLibro:nombreLibro,
+                nombreAutor:nombreAutor,
+                id:data.id
+            }]);
+
+            setNombreAutor('');
+            setNombreLibro('');
+
+        
+
+        }catch(error){
+            console.log(error);
+        }
+    }
   return (
     <div className='container mt-5'>
         <h1 className='text-center'> Crudo de Libros</h1>
@@ -25,9 +64,9 @@ function Formulario() {
             </div>
             <div className="col-4">
                 <h4 className="text-center">Agregar Libros</h4>
-                <form >
-                    <input type="text" className="form-control mb-2" placeholder='Ingrese el Nombre del Libro' />
-                    <input type="text" className="form-control mb-2" placeholder='Ingrese el Autor'/>
+                <form onSubmit={guardarLibros}>
+                    <input type="text" className="form-control mb-2" placeholder='Ingrese el Nombre del Libro' value={nombreLibro} onChange={(e)=>setNombreLibro(e.target.value)} />
+                    <input type="text" className="form-control mb-2" placeholder='Ingrese el Autor' value={nombreAutor} onChange={(e)=>setNombreAutor(e.target.value)}/>
                     <button className="btn btn-primary btn-block">Agregar</button>
                 </form>
             </div>
