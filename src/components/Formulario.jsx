@@ -11,16 +11,23 @@ function Formulario() {
     const [listaLibros,setListaLibros]=useState([])
 
     useEffect(()=>{
-        const obtenerDatos=async()=>{
+
+        const obtenerDatos = async() => {
             try {
-                await onSnapshot(collection(db,'libros',(query)=>{
-                    setListaLibros(query.docs.map(doc=>({...doc.data(),id:doc.id}))
-                }))
-            } catch (error) {
-                console.log(error)
+                await onSnapshot(collection(db,'libros'),(query) => {
+                    setListaLibros(query.docs.map((doc)=>({...doc.data(), id:doc.id})))
+                })
+
+                console.log(listaLibros)
+            
+            } catch (error){
+                console.log(error);
+            
             }
-        }
-    });
+         }
+          obtenerDatos();
+        
+         }, [])
 
     const guardarLibros=async(e)=>{
         e.preventDefault();
@@ -47,19 +54,38 @@ function Formulario() {
             console.log(error);
         }
     }
+
+    const eliminarLibro=async id=>{
+        try{
+            await deleteDoc(doc(db,'libros',id));
+        }catch(error){
+            console.log(error);
+        }
+
+    }
+
+    const editarLibro=item=>{
+        setNombreLibro(item.nombreLibro);
+        setNombreAutor(item.nombreAutor);
+    }
   return (
     <div className='container mt-5'>
-        <h1 className='text-center'> Crudo de Libros</h1>
+        <h1 className='text-center'> Crud de Libros </h1>
         <hr/>
         <div className="row">
             <div className="col-8">
-                <h4 className="text-center">Listado de libros</h4>
+                <h4 className="text-center"> Listado de libros </h4>
                 <ul className='list-group'>
-                    <li className='list-group-item'>
-                        <span className='lead'>Test</span>
-                        <button className="btn btn-danger btn-sm float-end mx-2">Eliminar</button>
-                        <button className="btn btn-warning btn-sm float-end">Editar</button>
-                    </li>
+                    {
+                        listaLibros.map(item=>(
+                            <li className='list-group-item' key={item.id}>
+                            <span className='lead'>{item.nombreLibro}-{item.nombreAutor}</span>
+                            <button className="btn btn-danger btn-sm float-end mx-2" onClick={()=>eliminarLibro(item.id)}>Eliminar</button>
+                            <button className="btn btn-warning btn-sm float-end" onClick={()=>editarLibro(item)}>Editar</button>
+                        </li>
+                        ))
+                    }
+                   
                 </ul>
             </div>
             <div className="col-4">
