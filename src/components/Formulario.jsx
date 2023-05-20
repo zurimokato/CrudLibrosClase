@@ -1,6 +1,6 @@
 
 
-import React,{useState,useEffect, Fragment} from 'react'
+import React,{useState,useEffect} from 'react'
 import { db } from '../firebase'
 import { collection,doc,addDoc,onSnapshot,deleteDoc,updateDoc, query } from 'firebase/firestore'
 
@@ -15,18 +15,27 @@ function Formulario() {
 
     const editarLibros=async e=>{
         e.preventDefault();
-        const docRef=doc(db,'libros',id);
-        await updateDoc(docRef,{
-            nombreLibro:nombreLibro,
-            nombreAutor:nombreAutor
-        });
-        const nuevoArray=listaLibros.map(item=>item.id===id ? {id:id, nombreLibro:nombreLibro,nombreAutor:nombreAutor}:item
-        )
-        setListaLibros(nuevoArray);
-        setNombreAutor('');
-        setNombreLibro('');
-        setId('')
-        setModoEdicion(false);
+        try {
+            if(nombreLibro==='' || nombreAutor===''){
+                return;
+            }
+            const docRef=doc(db,'libros',id);
+            await updateDoc(docRef,{
+                nombreLibro:nombreLibro,
+                nombreAutor:nombreAutor
+            });
+            const nuevoArray=listaLibros.map(item=>item.id===id ? {id:id, nombreLibro:nombreLibro,nombreAutor:nombreAutor}:item
+            )
+            setListaLibros(nuevoArray);
+            setNombreAutor('');
+            setNombreLibro('');
+            setId('')
+            setModoEdicion(false);
+            
+        } catch (error) {
+            console.log(error);
+        }
+       
 
     }
 
@@ -34,8 +43,8 @@ function Formulario() {
 
         const obtenerDatos = async() => {
             try {
-                await onSnapshot(collection(db,'libros'),(query) => {
-                    setListaLibros(query.docs.map((doc)=>({...doc.data(), id:doc.id})))
+                onSnapshot(collection(db, 'libros'), (query) => {
+                    setListaLibros(query.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
                 })
 
                 console.log(listaLibros)
@@ -52,6 +61,9 @@ function Formulario() {
     const guardarLibros=async(e)=>{
         e.preventDefault();
         try{
+            if(nombreLibro==='' || nombreAutor===''){
+                return;
+            }
 
             const data=await addDoc(collection(db,'libros'),{
                 nombreLibro:nombreLibro,
@@ -93,7 +105,7 @@ function Formulario() {
 
     }
 
-    const editarLibro=item=>{
+    const editar=item=>{
         setNombreLibro(item.nombreLibro);
         setNombreAutor(item.nombreAutor);
         setId(item.id);
@@ -112,7 +124,7 @@ function Formulario() {
                             <li className='list-group-item' key={item.id}>
                             <span className='lead'>{item.nombreLibro}-{item.nombreAutor}</span>
                             <button className="btn btn-danger btn-sm float-end mx-2" onClick={()=>eliminarLibro(item.id)}>Eliminar</button>
-                            <button className="btn btn-warning btn-sm float-end" onClick={()=>  (item)}>Editar</button>
+                            <button className="btn btn-warning btn-sm float-end" onClick={()=>editar(item)}>Editar</button>
                         </li>
                         ))
                     }
